@@ -1,0 +1,7 @@
+# CaptivePortal
+
+## Installation
+
+## Configuration
+
+## Credits

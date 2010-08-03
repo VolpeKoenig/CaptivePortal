@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# captiveportal:	Captive Portal Configuration Script
+#
+# chkconfig:		2345 26 89
+# description:		Configures iptables and network subsystem for captive portal and routing
+#
+
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -v
+
+iptables -t nat -I PREROUTING -i eth1 -p tcp --dport 80 -j REDIRECT --to-port 80 -v
+
+awk 'BEGIN { FS="\t"; } { system("iptables -t nat -I PREROUTING -m mac --mac-source "$1" -j ACCEPT -v"); }' /var/www/html/allowed
+
+iptables -A FORWARD -i eth1 -j DROP -v
+iptables -I FORWARD -i eth1 -d 8.8.0.0/16 -j ACCEPT -v
+iptables -I FORWARD -i eth1 -d 10.0.0.1 -j ACCEPT -v
+
+awk 'BEGIN { FS="\t"; } { system("iptables -I FORWARD -m mac --mac-source "$1" -j ACCEPT -v"); }' /var/www/html/allowed
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
